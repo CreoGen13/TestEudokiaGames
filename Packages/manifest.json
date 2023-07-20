@@ -1,7 +1,8 @@
 {
   "dependencies": {
-    "com.scellecs.morpeh": "https://github.com/scellecs/morpeh.git",
+    "com.unity.cinemachine": "2.7.9",
     "com.unity.ide.rider": "3.0.24",
+    "com.unity.inputsystem": "1.4.4",
     "com.unity.test-framework": "1.1.33",
     "com.unity.textmeshpro": "3.0.6",
     "com.unity.timeline": "1.5.7",
