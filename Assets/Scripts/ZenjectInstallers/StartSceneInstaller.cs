@@ -1,9 +1,15 @@
 using Cinemachine;
+using Enemy;
+using Game;
 using Infrastructure.Pools.Enemy;
 using Infrastructure.Pools.Projectile;
+using Infrastructure.Pools.Supply;
 using Mono;
+using Player;
 using Scriptables;
+using UI.Hud;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Zenject;
 
 namespace ZenjectInstallers
@@ -11,31 +17,38 @@ namespace ZenjectInstallers
     public class StartSceneInstaller : MonoInstaller
     {
         [Header("References")]
-        [SerializeField] private Game game;
         [SerializeField] private CinemachineVirtualCamera virtualCamera;
         [SerializeField] private Camera playerCamera;
         [SerializeField] private Transform projectilePoolParent;
         [SerializeField] private Transform enemyPoolParent;
+        [SerializeField] private Transform supplyPoolParent;
+        [SerializeField] private LevelInfoHolder levelInfoHolder;
+        [SerializeField] private GameView gameView;
         
-        [Header("Points")]
-        [SerializeField] private Transform playerPoint;
-        [SerializeField] private Transform [] enemyPoints;
-        
+        [Header("UI")]
+        [SerializeField] private HudView hudView;
+
         [Header("Prefabs")]
         [SerializeField] private GameObject playerPrefab;
         [SerializeField] private GameObject enemyPrefab;
         [SerializeField] private GameObject projectilePrefab;
+        [SerializeField] private GameObject supplyPrefab;
         
         [Header("Scriptables")]
         [SerializeField] private ScriptablePlayerSettings playerSettings;
         [SerializeField] private ScriptableGameSettings gameSettings;
         public override void InstallBindings()
         {
+            BindHud();
             BindScriptables();
+            
+            BindEnemyPool();
+            BindSupplyPool();
             BindProjectilePool();
+            
             BindCamera();
             BindPlayer();
-            BindEnemyPool();
+            BindNavMeshHolder();
 
             BindGame();
         }
@@ -43,10 +56,16 @@ namespace ZenjectInstallers
         private void BindGame()
         {
             Container
-                .Bind<Game>()
-                .FromInstance(game)
+                .Bind<GamePresenter>()
                 .AsSingle()
-                .NonLazy();
+                .WithArguments(new GameModel(), gameView);
+        }
+        private void BindNavMeshHolder()
+        {
+            Container
+                .Bind<LevelInfoHolder>()
+                .FromInstance(levelInfoHolder)
+                .AsSingle();
         }
         private void BindCamera()
         {
@@ -57,16 +76,16 @@ namespace ZenjectInstallers
         }
         private void BindPlayer()
         {
-            PlayerController playerController =
-                Container.InstantiatePrefabForComponent<PlayerController>(playerPrefab, playerPoint.position,
+            PlayerView playerView =
+                Container.InstantiatePrefabForComponent<PlayerView>(playerPrefab, levelInfoHolder.PlayerPoint.position,
                     Quaternion.identity, null);
 
-            virtualCamera.Follow = playerController.CameraFollow;
+            virtualCamera.Follow = playerView.CameraFollow;
 
             Container
-                .Bind<PlayerController>()
-                .FromInstance(playerController)
-                .AsSingle();
+                .Bind<PlayerPresenter>()
+                .AsSingle()
+                .WithArguments(new PlayerModel(), playerView);
         }
         private void BindScriptables()
         {
@@ -97,8 +116,7 @@ namespace ZenjectInstallers
             Container
                 .Bind<ProjectilePool>()
                 .FromInstance(pool)
-                .AsCached()
-                .WithArguments(projectilePoolParent);
+                .AsCached();
         }
         private void BindEnemyPool()
         {
@@ -110,8 +128,27 @@ namespace ZenjectInstallers
             Container
                 .Bind<EnemyPool>()
                 .AsSingle()
-                .WithArguments(enemyPoolParent, enemyPoints);
+                .WithArguments(enemyPoolParent, levelInfoHolder.EnemyPoints);
+        }
+        private void BindSupplyPool()
+        {
+            Container
+                .Bind<SupplyFactory>()
+                .AsSingle()
+                .WithArguments(supplyPrefab);
 
+            Container
+                .Bind<SupplyPool>()
+                .AsSingle()
+                .WithArguments(supplyPoolParent, levelInfoHolder.SupplyPoints);
+        }
+
+        private void BindHud()
+        {
+            Container
+                .Bind<HudPresenter>()
+                .AsSingle()
+                .WithArguments(new HudModel(), hudView);
         }
     }
 }

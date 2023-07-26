@@ -12,6 +12,10 @@ namespace Infrastructure.Services.Input
         public Vector2 MouseInput;
         public float ShootInput;
         
+        public float MenuInput;
+        public float UpgradeDamageInput;
+        public float UpgradeReloadInput;
+        
         public InputServiceModel()
         {
             _subject = new BehaviorSubject<InputServiceModel>(this);

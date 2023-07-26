@@ -53,6 +53,33 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Menu"",
+                    ""type"": ""Button"",
+                    ""id"": ""58828b0d-df8c-4871-818d-dcea8eccfb3a"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""UpgradeDamage"",
+                    ""type"": ""Button"",
+                    ""id"": ""3d333b95-28b9-48f2-95e8-db9258175495"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""UpgradeReload"",
+                    ""type"": ""Button"",
+                    ""id"": ""3a779e4d-0472-4edc-9fe3-9d374a47201b"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -132,6 +159,39 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""action"": ""Mouse"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""cd78f7a1-7090-49ae-a0a0-c73958461b30"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""PC"",
+                    ""action"": ""Menu"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7c0839a4-f838-42a3-97d0-2a5d3b5e38e1"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""PC"",
+                    ""action"": ""UpgradeDamage"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0fe47a3e-0065-429c-95e8-1f7773140412"",
+                    ""path"": ""<Keyboard>/2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""PC"",
+                    ""action"": ""UpgradeReload"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -160,6 +220,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         m_Player_Movement = m_Player.FindAction("Movement", throwIfNotFound: true);
         m_Player_Mouse = m_Player.FindAction("Mouse", throwIfNotFound: true);
         m_Player_Shoot = m_Player.FindAction("Shoot", throwIfNotFound: true);
+        m_Player_Menu = m_Player.FindAction("Menu", throwIfNotFound: true);
+        m_Player_UpgradeDamage = m_Player.FindAction("UpgradeDamage", throwIfNotFound: true);
+        m_Player_UpgradeReload = m_Player.FindAction("UpgradeReload", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -222,6 +285,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Movement;
     private readonly InputAction m_Player_Mouse;
     private readonly InputAction m_Player_Shoot;
+    private readonly InputAction m_Player_Menu;
+    private readonly InputAction m_Player_UpgradeDamage;
+    private readonly InputAction m_Player_UpgradeReload;
     public struct PlayerActions
     {
         private @PlayerControls m_Wrapper;
@@ -229,6 +295,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         public InputAction @Movement => m_Wrapper.m_Player_Movement;
         public InputAction @Mouse => m_Wrapper.m_Player_Mouse;
         public InputAction @Shoot => m_Wrapper.m_Player_Shoot;
+        public InputAction @Menu => m_Wrapper.m_Player_Menu;
+        public InputAction @UpgradeDamage => m_Wrapper.m_Player_UpgradeDamage;
+        public InputAction @UpgradeReload => m_Wrapper.m_Player_UpgradeReload;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -247,6 +316,15 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @Shoot.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnShoot;
                 @Shoot.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnShoot;
                 @Shoot.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnShoot;
+                @Menu.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMenu;
+                @Menu.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMenu;
+                @Menu.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMenu;
+                @UpgradeDamage.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUpgradeDamage;
+                @UpgradeDamage.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUpgradeDamage;
+                @UpgradeDamage.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUpgradeDamage;
+                @UpgradeReload.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUpgradeReload;
+                @UpgradeReload.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUpgradeReload;
+                @UpgradeReload.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUpgradeReload;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -260,6 +338,15 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @Shoot.started += instance.OnShoot;
                 @Shoot.performed += instance.OnShoot;
                 @Shoot.canceled += instance.OnShoot;
+                @Menu.started += instance.OnMenu;
+                @Menu.performed += instance.OnMenu;
+                @Menu.canceled += instance.OnMenu;
+                @UpgradeDamage.started += instance.OnUpgradeDamage;
+                @UpgradeDamage.performed += instance.OnUpgradeDamage;
+                @UpgradeDamage.canceled += instance.OnUpgradeDamage;
+                @UpgradeReload.started += instance.OnUpgradeReload;
+                @UpgradeReload.performed += instance.OnUpgradeReload;
+                @UpgradeReload.canceled += instance.OnUpgradeReload;
             }
         }
     }
@@ -278,5 +365,8 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         void OnMovement(InputAction.CallbackContext context);
         void OnMouse(InputAction.CallbackContext context);
         void OnShoot(InputAction.CallbackContext context);
+        void OnMenu(InputAction.CallbackContext context);
+        void OnUpgradeDamage(InputAction.CallbackContext context);
+        void OnUpgradeReload(InputAction.CallbackContext context);
     }
 }

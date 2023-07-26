@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: Player Settings
   m_EditorClassIdentifier: 
   playerRotationSpeed: 180
-  projectileForwardForce: 800
+  projectileForwardForce: 1400
   projectileUpForce: 200
+  cannonReloadTime: 1

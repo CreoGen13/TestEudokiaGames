@@ -11,5 +11,6 @@ namespace Scriptables
         [Header("Cannon")]
         public float projectileForwardForce;
         public float projectileUpForce;
+        public float cannonReloadTime;
     }
 }

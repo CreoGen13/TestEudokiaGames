@@ -12,5 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd6691434c2d43a58aac58f619d4d706, type: 3}
   m_Name: Game Settings
   m_EditorClassIdentifier: 
+  spawnSupplyTime: 10
+  spawnEnemyTime: 5
+  stopSpawnEnemyTime: 3
+  upgradeTime: 10
+  gameCoefficient: 0.05
+  projectileAfterHitLifeTime: 1
+  projectileLifeTime: 3
+  projectileDamage: 5
   enemyTag: Enemy
-  projectileLifeTime: 1
+  enemyHealth: 10
+  enemySpeed: 2
+  enemyDistanceTolerance: 0.1
+  supplyTag: Supply
+  supplyRotation: {x: 0, y: 1, z: 0}

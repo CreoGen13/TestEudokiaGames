@@ -1,5 +1,6 @@
 using System;
 using Base;
+using Base.Classes;
 using Scriptables;
 using UniRx;
 using UnityEngine;
@@ -17,9 +18,15 @@ namespace Infrastructure.Services.Input
         private readonly CompositeDisposable _disposable = new CompositeDisposable();
         private IDisposable _movementSubscription;
         private IDisposable _shootSubscription;
+        private IDisposable _menuSubscription;
+        private IDisposable _upgradeDamageSubscription;
+        private IDisposable _upgradeReloadSubscription;
 
         public Action<Vector2> OnMovementInputChanged;
         public Action<Vector2> OnShootInputChanged;
+        public Action OnMenuInputChanged;
+        public Action OnUpgradeDamageInputChanged;
+        public Action OnUpgradeReloadInputChanged;
 
         
         [Inject]
@@ -58,6 +65,45 @@ namespace Infrastructure.Services.Input
                         }
                     })
                 .AddTo(_disposable);
+            
+            _menuSubscription = _model.Observe()
+                .Select(model => model.MenuInput)
+                .DistinctUntilChanged(state => state.GetHashCode())
+                .Subscribe(
+                    value =>
+                    {
+                        if(value > 0)
+                        {
+                            OnMenuInputChanged?.Invoke();
+                        }
+                    })
+                .AddTo(_disposable);
+            
+            _upgradeDamageSubscription = _model.Observe()
+                .Select(model => model.UpgradeDamageInput)
+                .DistinctUntilChanged(state => state.GetHashCode())
+                .Subscribe(
+                    value =>
+                    {
+                        if(value > 0)
+                        {
+                            OnUpgradeDamageInputChanged?.Invoke();
+                        }
+                    })
+                .AddTo(_disposable);
+            
+            _upgradeReloadSubscription = _model.Observe()
+                .Select(model => model.UpgradeReloadInput)
+                .DistinctUntilChanged(state => state.GetHashCode())
+                .Subscribe(
+                    value =>
+                    {
+                        if(value > 0)
+                        {
+                            OnUpgradeReloadInputChanged?.Invoke();
+                        }
+                    })
+                .AddTo(_disposable);
         }
 
         public override void Update()
@@ -65,6 +111,10 @@ namespace Infrastructure.Services.Input
             _model.MovementInput = _playerControls.Player.Movement.ReadValue<Vector2>();
             _model.MouseInput = _playerControls.Player.Mouse.ReadValue<Vector2>();
             _model.ShootInput = _playerControls.Player.Shoot.ReadValue<float>();
+            
+            _model.MenuInput = _playerControls.Player.Menu.ReadValue<float>();
+            _model.UpgradeDamageInput = _playerControls.Player.UpgradeDamage.ReadValue<float>();
+            _model.UpgradeReloadInput = _playerControls.Player.UpgradeReload.ReadValue<float>();
             _model.Update();
         }
 
@@ -76,6 +126,7 @@ namespace Infrastructure.Services.Input
         public override void OnDisable()
         {
             _playerControls.Disable();
+            _disposable.Dispose();
         }
     }
 }
