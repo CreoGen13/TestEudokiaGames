@@ -47,8 +47,10 @@ namespace UI.PauseMenu
         public void OpenMenu(Action callback)
         {
             background.enabled = true;
+            background.color = new Color(0, 0, 0, 0);
             window.gameObject.SetActive(true);
             var pos = window.localPosition;
+            
             window.localPosition = new Vector3(pos.x, Screen.height, pos.z);
             _sequence = DOTween.Sequence();
             _sequence.Join(
