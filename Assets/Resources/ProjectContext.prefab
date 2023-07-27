@@ -74,3 +74,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectSettings: {fileID: 11400000, guid: a8c18ca09bbc6504b97450e3142532ad, type: 2}
+  uiSettings: {fileID: 11400000, guid: 12f5d97d13134dc4580c5b7eee127cb9, type: 2}

@@ -1,5 +1,7 @@
-﻿using Base;
+﻿using System;
+using Base;
 using Base.Classes;
+using Base.Interfaces;
 using DG.Tweening;
 using Infrastructure.Pools.Projectile;
 using Infrastructure.Services.Input;
@@ -10,7 +12,7 @@ using Zenject;
 
 namespace Player
 {
-    public class PlayerView : BaseView
+    public class PlayerView : BaseView, IProceduralView
     {
         [SerializeField] private CharacterController characterController;
         [SerializeField] private Transform cameraFollow;
@@ -19,19 +21,30 @@ namespace Player
         private ScriptablePlayerSettings _playerSettings;
         private InputService _inputService;
         private Camera _playerCamera;
+        private PlayerPresenter _presenter;
 
         private bool _isRotating;
         private Sequence _rotationSequence;
 
         public Transform CameraFollow => cameraFollow;
-        
+
         [Inject]
         private void Construct(ScriptablePlayerSettings playerSettings, Camera playerCamera)
         {
             _playerSettings = playerSettings;
             _playerCamera = playerCamera;
         }
-        
+
+        public void SetPresenter(BasePresenter presenter)
+        {
+            _presenter = (PlayerPresenter)presenter;
+        }
+
+        private void Start()
+        {
+            _presenter.Start();
+        }
+
         public void Move(Vector2 inputAxis)
         {
             if(_isRotating || inputAxis == Vector2.zero ||  inputAxis == Vector2.up)
@@ -50,6 +63,7 @@ namespace Player
                 _isRotating = false;
             });
         }
+
         public void Shoot(Vector2 mousePosition, ProjectilePresenter projectile)
         {
             projectile.SetPosition(projectileSpawnPoint.position);
@@ -70,6 +84,11 @@ namespace Player
                             upDirection * _playerSettings.projectileUpForce;
                 projectile.AddForce(force, ForceMode.Force);
             }
+        }
+
+        private void OnDestroy()
+        {
+            _presenter.Dispose();
         }
     }
 }

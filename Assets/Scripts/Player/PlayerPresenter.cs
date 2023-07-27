@@ -10,6 +10,7 @@ namespace Player
 {
     public class PlayerPresenter : BaseGenericPresenter<PlayerModel, PlayerView>
     {
+        private readonly InputService _inputService;
         private readonly TimeService _timeService;
         private readonly ScriptablePlayerSettings _playerSettings;
         private readonly IProjectilePool _projectilePool;
@@ -19,19 +20,35 @@ namespace Player
         public PlayerPresenter(PlayerModel model, PlayerView view, ScriptablePlayerSettings playerSettings, IProjectilePool projectilePool, InputService inputService, TimeService timeService)
             : base(model, view)
         {
+            _inputService = inputService;
             _playerSettings = playerSettings;
             _projectilePool = projectilePool;
             _timeService = timeService;
+        }
+
+        public sealed override void Reset()
+        {
+            _reloadTimer = _timeService.GetTimer(_playerSettings.cannonReloadTime, () =>
+            {
+                Model.IsReloaded = true;
+                Model.Update();
+            });
             
-            inputService.OnMovementInputChanged += View.Move;
-            inputService.OnShootInputChanged += Shoot;
-            
-            Reset();
+            Model.IsReloaded = true;
+            Model.ReloadTime = _playerSettings.cannonReloadTime;
+            Model.Update();
         }
 
         protected override void Init()
         {
-            throw new System.NotImplementedException();
+            _inputService.OnMovementInputChanged += View.Move;
+            _inputService.OnShootInputChanged += Shoot;
+        }
+
+        public void Start()
+        {
+            Reset();
+            Init();
         }
 
         private void Shoot(Vector2 mousePosition)
@@ -46,23 +63,18 @@ namespace Player
             var projectile = _projectilePool.Spawn();
             View.Shoot(mousePosition, projectile);
         }
-        
+
         public void SetCoefficient(float reload)
         {
             Model.ReloadTime = reload;
         }
 
-        public sealed override void Reset()
+        public override void Dispose()
         {
-            _reloadTimer = _timeService.GetTimer(_playerSettings.cannonReloadTime, () =>
-            {
-                Model.IsReloaded = true;
-                Model.Update();
-            });
+            _inputService.OnMovementInputChanged -= View.Move;
+            _inputService.OnShootInputChanged -= Shoot;
             
-            Model.IsReloaded = true;
-            Model.ReloadTime = _playerSettings.cannonReloadTime;
-            Model.Update();
+            base.Dispose();
         }
     }
 }

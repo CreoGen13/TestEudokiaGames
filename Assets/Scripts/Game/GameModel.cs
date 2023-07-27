@@ -13,7 +13,12 @@ namespace Game
         public ProjectileCoefficients ProjectileCoefficients;
         
         public float SpawnTime;
+        
+        public int EnemiesLeft;
         public int Points;
+
+        public bool IsPaused;
+        public bool IsGameOver;
         
         public GameModel()
         {

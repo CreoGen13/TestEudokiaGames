@@ -19,7 +19,7 @@ namespace Base.Classes
             Model = model;
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             Disposable.Dispose();
         }

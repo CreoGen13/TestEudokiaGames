@@ -1,5 +1,4 @@
-﻿using Infrastructure.Services;
-using Infrastructure.Services.Input;
+﻿using Infrastructure.Services.Input;
 using Infrastructure.Services.Timer;
 using Scriptables;
 using UnityEngine;
@@ -10,13 +9,14 @@ namespace ZenjectInstallers
     public class BootstrapInstaller : MonoInstaller
     {
         [SerializeField] private ScriptableProjectSettings projectSettings;
+        [SerializeField] private ScriptableUiSettings uiSettings;
         public override void InstallBindings()
         {
             BindScriptables();
-            BindeServices();
+            BindServices();
         }
         
-        private void BindeServices()
+        private void BindServices()
         {
             Container
                 .Bind<InputService>()
@@ -31,6 +31,11 @@ namespace ZenjectInstallers
             Container
                 .Bind<ScriptableProjectSettings>()
                 .FromInstance(projectSettings)
+                .AsSingle();
+            
+            Container
+                .Bind<ScriptableUiSettings>()
+                .FromInstance(uiSettings)
                 .AsSingle();
         }
     }

@@ -1,5 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using Random = UnityEngine.Random;
 
 namespace Infrastructure.Utils
 {
@@ -26,7 +31,6 @@ namespace Infrastructure.Utils
                 vectorSmallerAbs.y < vectorLargerAbs.y &&
                 vectorSmallerAbs.z < vectorLargerAbs.z;
         }
-
         public static Vector3 GetRandomPlanePosition(GameObject plane)
         {
             List<Vector3> verticesList = new List<Vector3>(plane.GetComponent<MeshFilter>().sharedMesh.vertices);
@@ -43,6 +47,36 @@ namespace Infrastructure.Utils
             //phere.transform.position = rndPointOnPlane + plane.transform.up * 0.5f;
             
             return rndPointOnPlane;
+        }
+        
+        public static async UniTask LoadScene(string sceneName, string loadSceneName)
+        {
+            CancellationTokenSource cts = new CancellationTokenSource();
+            var token = cts.Token;
+            try
+            {
+                token.ThrowIfCancellationRequested();
+                if (token.IsCancellationRequested)
+                    return;
+
+                await SceneManager.LoadSceneAsync(loadSceneName, LoadSceneMode.Single)
+                    .WithCancellation(token);
+
+                await SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single)
+                    .WithCancellation(token);
+            }
+            catch (OperationCanceledException e)
+            {
+                if (e.CancellationToken == cts.Token)
+                {
+                    Debug.LogError("Task cancelled");
+                }
+            }
+            finally
+            {
+                cts.Cancel();
+                cts.Dispose();
+            }
         }
     }
 }

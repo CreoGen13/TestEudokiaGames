@@ -8,6 +8,8 @@ namespace Infrastructure.Services.Input
     {
         private readonly BehaviorSubject<InputServiceModel> _subject;
 
+        public bool IsStopped;
+        
         public Vector2 MovementInput;
         public Vector2 MouseInput;
         public float ShootInput;

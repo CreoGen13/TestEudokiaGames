@@ -43,7 +43,7 @@ namespace Mono
 
         public void Update()
         {
-            transform.rotation *= Quaternion.Euler(_gameSettings.supplyRotation);
+            transform.rotation *= Quaternion.Euler(_gameSettings.supplyRotation * Time.deltaTime) ;
         }
     }
 

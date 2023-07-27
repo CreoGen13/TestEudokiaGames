@@ -1,5 +1,4 @@
 using Cinemachine;
-using Enemy;
 using Game;
 using Infrastructure.Pools.Enemy;
 using Infrastructure.Pools.Projectile;
@@ -7,14 +6,15 @@ using Infrastructure.Pools.Supply;
 using Mono;
 using Player;
 using Scriptables;
+using UI;
 using UI.Hud;
+using UI.PauseMenu;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Zenject;
 
 namespace ZenjectInstallers
 {
-    public class StartSceneInstaller : MonoInstaller
+    public class GameSceneInstaller : MonoInstaller
     {
         [Header("References")]
         [SerializeField] private CinemachineVirtualCamera virtualCamera;
@@ -24,9 +24,11 @@ namespace ZenjectInstallers
         [SerializeField] private Transform supplyPoolParent;
         [SerializeField] private LevelInfoHolder levelInfoHolder;
         [SerializeField] private GameView gameView;
+        [SerializeField] private GameOverScreen gameOverScreen;
         
         [Header("UI")]
         [SerializeField] private HudView hudView;
+        [SerializeField] private PauseMenuView pauseMenuView;
 
         [Header("Prefabs")]
         [SerializeField] private GameObject playerPrefab;
@@ -39,16 +41,18 @@ namespace ZenjectInstallers
         [SerializeField] private ScriptableGameSettings gameSettings;
         public override void InstallBindings()
         {
-            BindHud();
             BindScriptables();
-            
+            BindLevelInfoHolder();
+            BindPauseMenu();
+            BindHud();
+            BindGameOverScreen();
+
             BindEnemyPool();
             BindSupplyPool();
             BindProjectilePool();
-            
+
             BindCamera();
             BindPlayer();
-            BindNavMeshHolder();
 
             BindGame();
         }
@@ -60,7 +64,7 @@ namespace ZenjectInstallers
                 .AsSingle()
                 .WithArguments(new GameModel(), gameView);
         }
-        private void BindNavMeshHolder()
+        private void BindLevelInfoHolder()
         {
             Container
                 .Bind<LevelInfoHolder>()
@@ -76,16 +80,18 @@ namespace ZenjectInstallers
         }
         private void BindPlayer()
         {
-            PlayerView playerView =
-                Container.InstantiatePrefabForComponent<PlayerView>(playerPrefab, levelInfoHolder.PlayerPoint.position,
-                    Quaternion.identity, null);
-
+            var playerView = Container.InstantiatePrefabForComponent<PlayerView>(playerPrefab);
             virtualCamera.Follow = playerView.CameraFollow;
-
+            
             Container
                 .Bind<PlayerPresenter>()
                 .AsSingle()
-                .WithArguments(new PlayerModel(), playerView);
+                .WithArguments(new PlayerModel(), playerView)
+                .OnInstantiated((context, instance) =>
+                {
+                    playerView.SetPresenter((PlayerPresenter)instance);
+                })
+                .NonLazy();
         }
         private void BindScriptables()
         {
@@ -107,16 +113,9 @@ namespace ZenjectInstallers
                 .WithArguments(projectilePrefab);
 
             Container
-                .Bind<IProjectilePool>()
-                .To<ProjectilePool>()
-                .AsCached()
+                .BindInterfacesAndSelfTo<ProjectilePool>()
+                .AsSingle()
                 .WithArguments(projectilePoolParent);
-
-            var pool = (ProjectilePool)Container.Resolve<IProjectilePool>();
-            Container
-                .Bind<ProjectilePool>()
-                .FromInstance(pool)
-                .AsCached();
         }
         private void BindEnemyPool()
         {
@@ -142,13 +141,27 @@ namespace ZenjectInstallers
                 .AsSingle()
                 .WithArguments(supplyPoolParent, levelInfoHolder.SupplyPoints);
         }
-
         private void BindHud()
         {
             Container
                 .Bind<HudPresenter>()
                 .AsSingle()
                 .WithArguments(new HudModel(), hudView);
+        }
+        private void BindPauseMenu()
+        {
+            Container
+                .Bind<PauseMenuPresenter>()
+                .AsSingle()
+                .WithArguments(new PauseMenuModel(), pauseMenuView);
+        }
+
+        private void BindGameOverScreen()
+        {
+            Container
+                .Bind<GameOverScreen>()
+                .FromInstance(gameOverScreen)
+                .AsSingle();
         }
     }
 }

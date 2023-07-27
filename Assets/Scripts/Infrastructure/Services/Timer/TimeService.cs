@@ -7,7 +7,7 @@ namespace Infrastructure.Services.Timer
 {
     public class TimeService : BaseService
     {
-        public bool IsActive;
+        private bool _isStopped;
         private readonly List<EncapsulatedTimer> _timers = new List<EncapsulatedTimer>();
 
         private void Clear()
@@ -48,7 +48,7 @@ namespace Infrastructure.Services.Timer
         }
         public override void Update()
         {
-            if(!IsActive)
+            if(_isStopped)
                 return;
 
             List<EncapsulatedTimer> expiredTimers = new List<EncapsulatedTimer>();
@@ -70,7 +70,17 @@ namespace Infrastructure.Services.Timer
                 }
             }
         }
-        
+
+        public override void Stop()
+        {
+            _isStopped = true;
+        }
+
+        public override void Resume()
+        {
+            _isStopped = false;
+        }
+
         private class EncapsulatedTimer : Timer
         {
             public float TimeLeft;
@@ -112,13 +122,21 @@ namespace Infrastructure.Services.Timer
                 if(IsCompleted)
                     return;
 
-                _onUpdate?.Invoke(TimeLeft);
-                TimeLeft = Mathf.Clamp(TimeLeft - delta, 0, float.MaxValue);
-                if (TimeLeft == 0)
+                try
                 {
-                    IsCompleted = true;
-                    _onComplete?.Invoke();
+                    _onUpdate?.Invoke(TimeLeft);
+                    TimeLeft = Mathf.Clamp(TimeLeft - delta, 0, float.MaxValue);
+                    if (TimeLeft == 0)
+                    {
+                        IsCompleted = true;
+                        _onComplete?.Invoke();
+                    }
                 }
+                catch (Exception)
+                {
+                    Destroy();
+                }
+                
             }
         }
     }
